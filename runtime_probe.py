@@ -82,3 +82,15 @@ except Exception as error:
         print(f"TE_PRELOAD_RESULT=PASS version={transformer_engine.__version__}", flush=True)
     except Exception as retry_error:
         print(f"TE_PRELOAD_RESULT=FAIL error={retry_error!r}", flush=True)
+
+if "TE_LIBPATH_REEXEC" not in os.environ:
+    nvidia_root = Path(site.getsitepackages()[0]) / "nvidia"
+    lib_dirs = sorted(str(path) for path in nvidia_root.glob("*/lib") if path.is_dir())
+    child_env = os.environ.copy()
+    child_env["TE_LIBPATH_REEXEC"] = "1"
+    child_env["LD_LIBRARY_PATH"] = ":".join(
+        [*lib_dirs, child_env.get("LD_LIBRARY_PATH", "")]
+    ).rstrip(":")
+    print(f"TE_REEXEC_LIB_DIRS={lib_dirs}", flush=True)
+    completed = subprocess.run([sys.executable, __file__], env=child_env, check=False)
+    print(f"TE_REEXEC_RETURN_CODE={completed.returncode}", flush=True)
