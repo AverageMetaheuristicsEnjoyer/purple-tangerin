@@ -123,16 +123,26 @@ def archive_source(source, repo, prefix, receipts, key, token, temporary):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, action="append", required=True)
-    parser.add_argument("--repo", required=True)
-    parser.add_argument("--prefix", required=True)
-    parser.add_argument("--receipts", type=Path, required=True)
+    parser.add_argument("--repo")
+    parser.add_argument("--prefix")
+    parser.add_argument("--receipts", type=Path)
+    parser.add_argument("--inventory", action="store_true")
     parser.add_argument("--install-deps", action="store_true")
     args = parser.parse_args()
     os.umask(0o077)
+    sources = [path.resolve(strict=True) for path in args.source]
+    if args.inventory:
+        for source in sources:
+            files = [path for path in source.rglob("*") if path.is_file()]
+            print("DISK_INVENTORY=" + json.dumps({"source": str(source), "files": len(files),
+                  "source_bytes": sum(path.stat().st_size for path in files),
+                  "filesystem_free_bytes": shutil.disk_usage(source).free}), flush=True)
+        return
+    if not all([args.repo, args.prefix, args.receipts]):
+        parser.error("Archive mode requires --repo, --prefix and --receipts")
     key = os.environ.pop("ARCHIVE_KEY").encode()
     token = os.environ.pop("HF_TOKEN")
     os.environ["HF_HUB_DISABLE_IMPLICIT_TOKEN"] = "1"
-    sources = [path.resolve(strict=True) for path in args.source]
     if len({source.name for source in sources}) != len(sources):
         raise ValueError("Source basenames must be unique within this archive batch")
     if any(args.receipts.resolve().is_relative_to(source) for source in sources):
