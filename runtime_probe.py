@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import ctypes
 import importlib
+import importlib.metadata
 import importlib.util
 import os
 import site
@@ -42,6 +43,18 @@ found.update(Path(line) for line in search.stdout.splitlines())
 candidates = sorted(str(path.resolve()) for path in found)
 print(f"CUDART_CANDIDATES={candidates}", flush=True)
 print(f"TE_SPEC={importlib.util.find_spec('transformer_engine')}", flush=True)
+print(
+    "PACKAGE_SPECS"
+    f" nvidia={importlib.util.find_spec('nvidia')}"
+    f" cuda_runtime={importlib.util.find_spec('nvidia.cuda_runtime')}"
+    f" te_version={importlib.metadata.version('transformer_engine')}",
+    flush=True,
+)
+te_spec = importlib.util.find_spec("transformer_engine")
+te_common_path = Path(te_spec.origin).parent / "common" / "__init__.py"
+for line_number, line in enumerate(te_common_path.read_text().splitlines(), start=1):
+    if 270 <= line_number <= 310:
+        print(f"TE_SOURCE_{line_number}={line}", flush=True)
 
 try:
     import transformer_engine
