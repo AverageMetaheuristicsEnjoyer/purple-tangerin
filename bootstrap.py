@@ -12,6 +12,8 @@ def main():
     os.umask(0o077)
     key = os.environ.pop("BUNDLE_KEY")
     reflection_key = os.environ.pop("OPENROUTER_API_KEY", None)
+    archive_key = os.environ.pop("ARCHIVE_KEY", None)
+    hf_token = os.environ.pop("HF_TOKEN", None)
     payload = (Path(__file__).resolve().parent / "payload.fernet").read_bytes()
     with tempfile.TemporaryDirectory(prefix="private-bundle-") as directory:
         root = Path(directory)
@@ -35,6 +37,10 @@ def main():
         job_environment = dict(os.environ)
         if reflection_key:
             job_environment["OPENROUTER_API_KEY"] = reflection_key
+        if archive_key:
+            job_environment["ARCHIVE_KEY"] = archive_key
+        if hf_token:
+            job_environment["HF_TOKEN"] = hf_token
         return subprocess.run([sys.executable, "job.py", *sys.argv[1:]], cwd=source,
                               env=job_environment).returncode
 
