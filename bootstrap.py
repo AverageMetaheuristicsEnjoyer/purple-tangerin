@@ -14,7 +14,10 @@ from pathlib import Path
 def main():
     rank = os.environ.get("OMPI_COMM_WORLD_RANK", "0")
     run_id = os.environ.get("BUNDLE_RUN_ID", "manual")
-    artifact_dir = Path("/home/jovyan/shares/SR006.nfs2/xandi281/encrypted-bundles") / run_id
+    artifact_dir = (
+        Path("/home/jovyan/shares/SR006.nfs3/xandi281/hi-moe-megatron/encrypted-bundles")
+        / run_id
+    )
     artifact_dir.mkdir(parents=True, exist_ok=True)
     log_path = artifact_dir / f"rank-{rank}.log"
     result = "FAIL"
