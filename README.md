@@ -1,16 +1,10 @@
-# Encrypted Python job launcher
+# Encrypted Cloud launcher
 
-The launcher authenticates and decrypts `payload.fernet` with a separately supplied
-`BUNDLE_KEY`, extracts it into a temporary directory, and runs its `job.py` entrypoint.
-Arguments to `bootstrap.py` are forwarded to `job.py`. Python 3.12 is required.
-The temporary source directory is removed when the launcher exits normally.
+This branch contains only a generic launcher and an authenticated Fernet ciphertext.
+The decryption key is supplied separately at job submission and is not stored in Git.
+The launcher removes the key from its environment before dependency installation and
+does not pass it to the private subprocess.
 
-Encryption uses the standard `cryptography` Fernet implementation. The random key
-is not included in this repository. The key is removed from the launcher's Python
-environment before dependency installation and is not inherited by the job process.
-Never print the key, dump the complete job environment, or use a real key in a
-submission tool's dry-run output.
-
-This protects archive contents from public repository readers. It does not protect
-running code or keys from administrators of the execution environment. Ciphertext
-size, creation timestamp and repository history remain public metadata.
+This protects the payload from public GitHub readers. It does not protect it from the
+Cloud runtime, Cloud administrators, or gateway administrators involved in submission.
+Repository history also exposes ciphertext sizes and publication times.
