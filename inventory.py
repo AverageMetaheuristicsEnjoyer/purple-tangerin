@@ -11,6 +11,6 @@ for cell in sorted(args.source.iterdir()):
         continue
     files = [path for path in cell.rglob("*") if path.is_file()]
     checkpoints = sorted(int(path.name.split("_")[1]) for path in (cell / "training").glob("step_*") if (path / "COMPLETE").is_file())
-    print("CELL_INVENTORY=" + json.dumps({"name": cell.name, "files": len(files), "bytes": sum(path.stat().st_size for path in files), "complete": (cell / "COMPLETE.json").is_file(), "checkpoint_steps": checkpoints}), flush=True)
+    print("CELL_INVENTORY=" + json.dumps({"name": cell.name, "files": len(files), "bytes": sum(path.stat().st_size for path in files), "complete": (cell / "COMPLETE.json").is_file(), "checkpoint_steps": checkpoints, "complete_checkpoint_bytes": sum(file.stat().st_size for step in checkpoints for file in (cell / "training" / f"step_{step:06d}").rglob("*") if file.is_file())}), flush=True)
 usage = shutil.disk_usage(args.source)
 print("DISK_INVENTORY=" + json.dumps({"source": str(args.source), "filesystem_free_bytes": usage.free}), flush=True)
