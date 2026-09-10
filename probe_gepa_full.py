@@ -18,6 +18,29 @@ def read_json(path: Path):
         return {"read_error": f"{type(exc).__name__}: {exc}"}
 
 
+def evaluation_stats(path: Path):
+    if not path.is_file():
+        return {"calls": 0, "truncated": 0, "last_truncated": None}
+    calls = 0
+    truncated = 0
+    last_truncated = None
+    with path.open() as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            calls += 1
+            row = json.loads(line)
+            if row.get("finish_reason") == "length":
+                truncated += 1
+                last_truncated = {
+                    "key": row.get("key"),
+                    "raw_chars": len(row.get("raw") or ""),
+                    "usage": row.get("usage"),
+                    "raw_usage": row.get("raw_usage"),
+                }
+    return {"calls": calls, "truncated": truncated, "last_truncated": last_truncated}
+
+
 def jsonl_count(path: Path):
     if not path.is_file():
         return 0
@@ -38,6 +61,7 @@ if ROOT.is_dir():
         cloud_result = read_json(cell_dir / "cloud_result.json")
         receipt = read_json(cell_dir / "hf_upload_receipt.json")
         queue = cell_dir / "reflection_queue"
+        evaluations = evaluation_stats(cell_dir / "evaluations.jsonl")
         cells.append(
             {
                 "name": cell_dir.name,
@@ -48,7 +72,7 @@ if ROOT.is_dir():
                 "metric_calls": summary.get("total_metric_calls") if isinstance(summary, dict) else None,
                 "cloud_status": cloud_result.get("status") if isinstance(cloud_result, dict) else None,
                 "cloud_error": cloud_result.get("error") if isinstance(cloud_result, dict) else None,
-                "evaluations": jsonl_count(cell_dir / "evaluations.jsonl"),
+                "evaluations": evaluations,
                 "reflections": jsonl_count(cell_dir / "reflection.jsonl"),
                 "requests": len(list(queue.glob("request-*.json"))) if queue.is_dir() else 0,
                 "responses": len(list(queue.glob("response-*.json"))) if queue.is_dir() else 0,
