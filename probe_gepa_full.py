@@ -25,6 +25,12 @@ def jsonl_count(path: Path):
         return sum(bool(line.strip()) for line in handle)
 
 
+def tail(path: Path, limit: int = 5000):
+    if not path.is_file():
+        return None
+    return path.read_text(errors="replace")[-limit:]
+
+
 cells = []
 if ROOT.is_dir():
     for cell_dir in sorted(path for path in ROOT.iterdir() if path.is_dir()):
@@ -41,6 +47,7 @@ if ROOT.is_dir():
                 "seed_score": summary.get("seed_score") if isinstance(summary, dict) else None,
                 "metric_calls": summary.get("total_metric_calls") if isinstance(summary, dict) else None,
                 "cloud_status": cloud_result.get("status") if isinstance(cloud_result, dict) else None,
+                "cloud_error": cloud_result.get("error") if isinstance(cloud_result, dict) else None,
                 "evaluations": jsonl_count(cell_dir / "evaluations.jsonl"),
                 "reflections": jsonl_count(cell_dir / "reflection.jsonl"),
                 "requests": len(list(queue.glob("request-*.json"))) if queue.is_dir() else 0,
@@ -48,6 +55,9 @@ if ROOT.is_dir():
                 "worker_done": (queue / "WORKER_DONE.json").is_file(),
                 "hf_verified": bool(receipt and receipt.get("verified")),
                 "hf_commit": receipt.get("commit_sha") if isinstance(receipt, dict) else None,
+                "gepa_tail": tail(cell_dir / "gepa_stdout.log")
+                if isinstance(cloud_result, dict) and cloud_result.get("status") == "FAIL"
+                else None,
             }
         )
 
