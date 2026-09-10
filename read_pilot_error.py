@@ -3,7 +3,7 @@ from pathlib import Path
 
 root = Path(
     "/home/jovyan/shares/SR006.nfs2/xandi281/moe-revision-20260910/"
-    "gepa-alignment-pilot-v4/gpt-oss-20b-seed42-n200"
+    "gepa-alignment-pilot-v5/gpt-oss-20b-seed42-n200"
 )
 for name in ["cloud_result.json", "gepa_stdout.log", "task_server.log", "tests.log"]:
     path = root / name
