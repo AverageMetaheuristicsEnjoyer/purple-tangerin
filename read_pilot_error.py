@@ -25,3 +25,16 @@ for name in ["evaluations.jsonl", "reflection.jsonl"]:
         }},
         flush=True,
     )
+for name in ["summary.json", "cloud_result.json", "prompt_contract.json"]:
+    path = root / name
+    if path.is_file():
+        print(name + "=" + path.read_text(), flush=True)
+path = root / "candidates.json"
+if path.is_file():
+    candidates = json.loads(path.read_text())
+    summary_path = root / "summary.json"
+    best_idx = json.loads(summary_path.read_text())["best_idx"] if summary_path.is_file() else None
+    print("candidates=" + json.dumps({
+        "count": len(candidates),
+        "best": candidates[best_idx] if best_idx is not None else None,
+    }), flush=True)
