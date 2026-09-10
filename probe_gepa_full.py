@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(
     "/home/jovyan/shares/SR006.nfs2/xandi281/moe-revision-20260911/"
-    "civil-gepa-v2-user-only-v1/runs"
+    "civil-gepa-v2-user-only-v2/runs"
 )
 
 
@@ -59,7 +59,7 @@ if ROOT.is_dir():
     for cell_dir in sorted(path for path in ROOT.iterdir() if path.is_dir()):
         summary = read_json(cell_dir / "summary.json")
         cloud_result = read_json(cell_dir / "cloud_result.json")
-        receipt = read_json(cell_dir / "hf_upload_receipt.json")
+        receipt = read_json(cell_dir / "hf_receipt.json")
         queue = cell_dir / "reflection_queue"
         evaluations = evaluation_stats(cell_dir / "evaluations.jsonl")
         cells.append(
@@ -67,8 +67,8 @@ if ROOT.is_dir():
                 "name": cell_dir.name,
                 "summary_status": summary.get("status") if isinstance(summary, dict) else None,
                 "best_idx": summary.get("best_idx") if isinstance(summary, dict) else None,
-                "best_score": summary.get("best_score") if isinstance(summary, dict) else None,
-                "seed_score": summary.get("seed_score") if isinstance(summary, dict) else None,
+                "best_score": summary.get("validation_score") if isinstance(summary, dict) else None,
+                "seed_score": summary.get("seed_validation_score") if isinstance(summary, dict) else None,
                 "metric_calls": summary.get("total_metric_calls") if isinstance(summary, dict) else None,
                 "cloud_status": cloud_result.get("status") if isinstance(cloud_result, dict) else None,
                 "cloud_error": cloud_result.get("error") if isinstance(cloud_result, dict) else None,
@@ -76,9 +76,9 @@ if ROOT.is_dir():
                 "reflections": jsonl_count(cell_dir / "reflection.jsonl"),
                 "requests": len(list(queue.glob("request-*.json"))) if queue.is_dir() else 0,
                 "responses": len(list(queue.glob("response-*.json"))) if queue.is_dir() else 0,
-                "worker_done": (queue / "WORKER_DONE.json").is_file(),
-                "hf_verified": bool(receipt and receipt.get("verified")),
-                "hf_commit": receipt.get("commit_sha") if isinstance(receipt, dict) else None,
+                "worker_done": (queue / "stopped.json").is_file(),
+                "hf_verified": bool(receipt and receipt.get("status") == "VERIFIED"),
+                "hf_prefix": receipt.get("prefix") if isinstance(receipt, dict) else None,
                 "gepa_tail": tail(cell_dir / "gepa_stdout.log")
                 if isinstance(cloud_result, dict) and cloud_result.get("status") == "FAIL"
                 else None,
