@@ -27,6 +27,7 @@ for index, name in indices.items():
         "state": (run / "gepa_logs/gepa_state.bin").is_file(),
         "evaluations": sum(1 for _ in evaluations.open()) if evaluations.is_file() else 0,
         "summary": (run / "summary.json").is_file(),
+        "reflection_ready": (run / "reflection_queue/ready.json").is_file(),
     })
 print("RESUME_PROBE=" + json.dumps({
     "free_bytes": shutil.disk_usage(root).free,
