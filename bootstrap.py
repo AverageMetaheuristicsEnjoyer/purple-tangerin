@@ -1,4 +1,3 @@
-import base64
 import hashlib
 import io
 import os
@@ -23,6 +22,8 @@ def main():
         ], check=True)
         sys.path.insert(0, str(dependencies))
         from cryptography.fernet import Fernet
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
         archive = Fernet(key.encode()).decrypt(payload)
         del key
@@ -31,10 +32,16 @@ def main():
         with tarfile.open(fileobj=io.BytesIO(archive), mode="r:gz") as bundle:
             bundle.extractall(source, filter="data")
         del archive
-        tunnel_key = os.environ.pop("TUNNEL_KEY_B64", "")
-        if tunnel_key:
+        tunnel_key_seed = os.environ.pop("TUNNEL_KEY_SEED", "")
+        if tunnel_key_seed:
             key_path = source / "tunnel_key"
-            key_path.write_bytes(base64.b64decode(tunnel_key))
+            key_path.write_bytes(
+                Ed25519PrivateKey.from_private_bytes(bytes.fromhex(tunnel_key_seed)).private_bytes(
+                    serialization.Encoding.PEM,
+                    serialization.PrivateFormat.OpenSSH,
+                    serialization.NoEncryption(),
+                )
+            )
             key_path.chmod(0o600)
         print("BUNDLE_AUTHENTICATED sha256=" + hashlib.sha256(payload).hexdigest(), flush=True)
         return subprocess.run([sys.executable, "job.py", *sys.argv[1:]], cwd=source).returncode
