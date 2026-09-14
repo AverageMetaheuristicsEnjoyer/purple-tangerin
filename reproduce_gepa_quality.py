@@ -11,7 +11,7 @@ from pathlib import Path
 
 import torch
 from huggingface_hub import hf_hub_download
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, Mxfp4Config
 
 
 RESULTS_REPO = "AverageMetaheuristicsEnjoyer/moe-routing-drift-results"
@@ -193,7 +193,13 @@ def main() -> None:
         tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "left"
     model = AutoModelForCausalLM.from_pretrained(
-        MODEL, revision=REVISION, torch_dtype=torch.bfloat16, device_map="auto"
+        MODEL,
+        revision=REVISION,
+        dtype=torch.bfloat16,
+        device_map="cuda",
+        quantization_config=Mxfp4Config(dequantize=True),
+        attn_implementation="eager",
+        experts_implementation="grouped_mm",
     )
     model.eval()
     run_root = args.out_root / args.run
