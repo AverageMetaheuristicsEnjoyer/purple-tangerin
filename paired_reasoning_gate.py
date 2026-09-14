@@ -136,7 +136,6 @@ def main() -> None:
         device_map="cuda",
         quantization_config=Mxfp4Config(dequantize=True),
         attn_implementation="eager",
-        experts_implementation="grouped_mm",
     )
     model.eval()
     args.out.mkdir(parents=True, exist_ok=True)
@@ -208,6 +207,7 @@ def main() -> None:
                 "hardware": torch.cuda.get_device_name(),
                 "torch": torch.__version__,
                 "transformers": transformers.__version__,
+                "experts_implementation": getattr(model.config, "_experts_implementation", None),
                 **summarize(result_rows),
             }
             (run_dir / f"{mode}.summary.json").write_text(json.dumps(summary, indent=2) + "\n")
