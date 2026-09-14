@@ -199,7 +199,6 @@ def main() -> None:
         device_map="cuda",
         quantization_config=Mxfp4Config(dequantize=True),
         attn_implementation="eager",
-        experts_implementation="grouped_mm",
     )
     model.eval()
     run_root = args.out_root / args.run
