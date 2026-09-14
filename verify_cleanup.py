@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 import shutil
+import sys
 
 
 root = Path(
@@ -22,4 +23,4 @@ print("CLEANUP_VERIFY=" + json.dumps({
     "receipt": receipt,
     "free_bytes_now": shutil.disk_usage(root).free,
     "remaining_runs": active,
-}))
+}), file=sys.stderr)
