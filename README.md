@@ -11,6 +11,10 @@ environment before dependency installation and is not inherited by the job proce
 Never print the key, dump the complete job environment, or use a real key in a
 submission tool's dry-run output.
 
+This branch carries the encrypted GPT-OSS PEFT forced-reasoning pilot. The pilot
+compares native generation with a forced native `analysis` channel on the same
+held-out examples and selected v25 adapter.
+
 This protects archive contents from public repository readers. It does not protect
 running code or keys from administrators of the execution environment. Ciphertext
 size, creation timestamp and repository history remain public metadata.
