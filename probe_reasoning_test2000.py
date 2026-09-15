@@ -27,3 +27,4 @@ print("REASONING_PROGRESS=" + json.dumps({
         for root in roots
         if root.is_dir()
     },
+}))
