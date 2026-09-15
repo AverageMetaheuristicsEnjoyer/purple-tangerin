@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 
-root = Path("/home/jovyan/shares/SR006.nfs3/xandi281/moe-revision-20260915/peft-forced-reasoning-pilot-v1")
+root = Path("/home/jovyan/shares/SR006.nfs3/xandi281/moe-revision-20260915/peft-forced-reasoning-pilot-v2")
 rows = []
 for run in sorted(root.glob("multilabel-v2-user-only-gpt-oss-20b-*")):
     item = {"cell": run.name}
