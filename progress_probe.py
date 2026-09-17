@@ -1,9 +1,12 @@
 import json
 from pathlib import Path
 import shutil
+print("PROGRESS_PROBE_STARTED", flush=True)
 
 root = Path("/home/jovyan/shares/SR006.nfs1/xandi281/moe-revision-20260917/gpt-oss-20b-civil-v2-reasoning-peft-pilot-v5")
-result = {"root_exists": root.is_dir(), "nfs1_free_bytes": shutil.disk_usage(root.parent).free}
+result = {"root_exists": root.is_dir()}
+print("PROGRESS_PROBE_ROOT_EXISTS=" + str(result["root_exists"]), flush=True)
+result["nfs1_free_bytes"] = shutil.disk_usage(root.parent).free
 if root.is_dir():
     result["top_files"] = sorted(p.name for p in root.iterdir())
     pilot = root / "pilot"
